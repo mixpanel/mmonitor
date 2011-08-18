@@ -36,5 +36,5 @@ for ip, s in status['servers'].iteritems():
         if t.name in s:
             t.test(ip, s)
 
-status = json.dump(status, open(status_file, 'w'), indent=4)
+status = json.dump(status, open(status_file, 'w'), indent=4, sort_keys=True)
 email.flush()

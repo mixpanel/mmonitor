@@ -17,7 +17,7 @@ class Email(object):
         msg = 'To: ' + settings.to_addr + '\n'
         msg += 'From: ' + settings.from_addr + '\n'
         if len(self.messages) == 1:
-            msg += 'Subject: mmonitor: ' + messages[0][:200] + '\n'
+            msg += 'Subject: mmonitor: ' + self.messages[0][:200] + '\n'
         else:
             msg += 'Subject: mmonitor: multiple failures\n'
         msg += '\n\n'
