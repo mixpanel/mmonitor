@@ -1,0 +1,40 @@
+#!/usr/bin/env python
+
+import simplejson as json
+
+import settings
+from mail import Email
+from tests.mongo import Mongo
+
+status_file = 'status.json'
+
+try:
+    fp = open(status_file, 'r')
+    status = json.load(fp)
+    fp.close()
+except IOError:
+    status = {'servers': {}}
+
+email = Email()
+tests = []
+for t in settings.tests:
+    tests.append(t(email))
+
+for d in settings.discovery:
+    servers = d().get_servers() # [('ip', 'host')]
+    for server in servers:
+        ip = server[0]
+        if ip not in status['servers']: # do discovery
+            status['servers'][ip] = {}
+            print 'performing discovery on', server
+            for t in tests:
+                t.discover(ip, status['servers'][ip])
+        status['servers'][ip]['hostname'] = server[1]
+
+for ip, s in status['servers'].iteritems():
+    for t in tests:
+        if t.name in s:
+            t.test(ip, s)
+
+status = json.dump(status, open(status_file, 'w'), indent=4)
+email.flush()
