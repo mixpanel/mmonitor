@@ -1,4 +1,4 @@
-import settings
+import settings, logging
 
 def discovery(status, test):
     for d in settings.discovery:
@@ -7,7 +7,7 @@ def discovery(status, test):
             ip = server[0]
             if ip not in status['servers']: # do discovery
                 status['servers'][ip] = {}
-                print 'performing discovery on', server
+                logging.info('performing discovery on %r', server)
                 for t in test:
                     t.discover(ip, status['servers'][ip])
             status['servers'][ip]['hostname'] = server[1]

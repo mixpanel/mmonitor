@@ -2,6 +2,7 @@
 
 import simplejson as json
 from sys import argv
+import logging
 
 import settings
 from mail import Email
@@ -9,8 +10,11 @@ from tests.mongo import Mongo
 from discovery import discovery
 from tests import tests
 
+logging.basicConfig(filename='mmonitor.log', format='%(asctime)s %(levelname)-7s %(message)s', level=logging.INFO)
+
 status_file = 'status.json'
 
+logging.info('starting')
 try:
     fp = open(status_file, 'r')
     status = json.load(fp)

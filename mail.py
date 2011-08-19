@@ -9,7 +9,7 @@ class Email(object):
 
     def flush(self):
         from smtplib import SMTP
-        import settings
+        import settings, logging
 
         if not self.messages:
             return
@@ -24,6 +24,7 @@ class Email(object):
         msg += '\n'.join(self.messages)
         msg += '\n\n'
 
+        logging.info('sending mail:\n%s', '\n'.join(self.messages))
         smtp = SMTP(settings.smtp_host, 25)
         smtp.ehlo_or_helo_if_needed()
         smtp.sendmail(settings.from_addr, settings.to_addr, msg)
