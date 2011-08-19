@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import simplejson as json
+from sys import argv
 
 import settings
 from mail import Email
@@ -22,7 +23,8 @@ test = []
 for t in settings.tests:
     test.append(t(email))
 
-discovery(status, test)
+if len(argv) > 1 and argv[1] == '-a':
+    discovery(status, test)
 tests(status, test)
 
 status = json.dump(status, open(status_file, 'w'), indent=4, sort_keys=True)
