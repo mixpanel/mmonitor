@@ -12,7 +12,6 @@ class Mongo(Test):
             try:
                 result = self.get_status(ip, port)
             except Exception as e:
-                self.email.add('%s:%s mongo test\n%r' % (status['hostname'], port, e))
                 status[self.name][port] = 'error'
                 continue
 
@@ -45,4 +44,3 @@ class Mongo(Test):
             return 'secondary'
         else:
             return 'error'
-
