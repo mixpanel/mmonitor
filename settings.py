@@ -1,7 +1,7 @@
-from discovery import softlayer
+from discovery import softlayer, rackspace
 from tests import mongo, arb, memcache
 
-discovery = [softlayer.SoftLayer]
+discovery = [softlayer.SoftLayer, rackspace.Rackspace]
 tests = [mongo.Mongo, arb.Arb, memcache.Memcache]
 
 smtp_host = 'localhost'
