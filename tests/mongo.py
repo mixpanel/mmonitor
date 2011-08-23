@@ -32,7 +32,7 @@ class Mongo(Test):
 
     def get_status(self, ip, port):
         conn = pymongo.Connection(ip, int(port), max_pool_size=1, network_timeout=5)
-        db = conn.local
+        db = conn.test # mongos' don't support local
         result = db.command('isMaster')
         conn.disconnect()
         return result
