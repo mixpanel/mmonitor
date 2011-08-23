@@ -19,7 +19,7 @@ class Email(object):
         if len(self.messages) == 1:
             msg += 'Subject: mmonitor: ' + self.messages[0][:200] + '\n'
         else:
-            msg += 'Subject: mmonitor: multiple failures\n'
+            msg += 'Subject: mmonitor: multiple notices\n'
         msg += '\n\n'
         msg += '\n'.join(self.messages)
         msg += '\n\n'
