@@ -8,7 +8,8 @@ class Arb(Test):
 
         super(Arb, self).__init__(email)
         self.name = 'arb'
-        date = time.strftime('%Y-%m-%d')
+        t = time.gmtime(time.time() - 3600 * 24)
+        date = time.strftime('%Y-%m-%d', t)
         self.query = ':8000/query?project_id=3&to_date=%s&from_date=%s&selector=false' % (date, date)
         self.response = '{"status": "ok", "results": {"%s": 0}}\n' % date
 
@@ -19,7 +20,7 @@ class Arb(Test):
         else:
             status[self.name] = 'down'
         if status[self.name] != oldstatus:
-            self.email.add('%s arb status change %s -> %s' % (status['hostname'], oldstatus, status[self.name]))
+            self.email.add('%s arb status change: %s -> %s' % (status['hostname'], oldstatus, status[self.name]))
 
     def discover(self, ip, status):
         if self.is_up(ip):

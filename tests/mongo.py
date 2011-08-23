@@ -18,7 +18,7 @@ class Mongo(Test):
             oldstatus = status[self.name][port]
             status[self.name][port] = self.parse_status(result)
             if status[self.name][port] != oldstatus:
-                self.email.add('%s:%s mongo status change from %s -> %s' % (status['hostname'], port, oldstatus, status[self.name][port]))
+                self.email.add('%s:%s mongo status change: %s -> %s' % (status['hostname'], port, oldstatus, status[self.name][port]))
 
     def discover(self, ip, status):
         s = {}
