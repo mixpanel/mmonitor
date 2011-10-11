@@ -2,6 +2,7 @@
 
 import smtplib
 import sys
+import time
 import urllib2
 
 FROM_ADDR = 'mmonitor@corp.mixpanel.com'
@@ -9,7 +10,7 @@ TO_ADDR = 'integration-test@mixpanel2.pagerduty.com'
 
 class HeadRequest(urllib2.Request):
     def get_method(self):
-        return 'HEAD'
+        return 'GET'
 
 def check_if_sites_down():
     # simply pings www.mixpanel.com and api.mixpanel.com
@@ -19,11 +20,15 @@ def check_if_sites_down():
     check_site('http://api.mixpanel.com')
 
 def check_site(url):
+    print "testing site:", url # convert to logging
     try:
         resp = urllib2.urlopen(HeadRequest(url), data=None, timeout=30) # seconds
-        if resp.status != 200:
+        if resp.getcode() != 200:
             send_pagerduty_email(url, resp.msg)
-    except:
+        else:
+            print "site ok:", url
+    except Exception as ex:
+        print "exception!", str(ex)
         pass # todo: logging. should also possibly send pagerduty if monitoring fails
 
 def send_pagerduty_email(url, body):
@@ -38,7 +43,13 @@ def send_pagerduty_email(url, body):
         pass
 
 def format_pagerduty_email(from_addr, to_addr, url, body):
-    subject = url # todo: add date format 
+    gmt = time.gmtime()
+
+    # divide into 15 minute chunks so that PagerDuty can de-dup
+    adjusted_minutes = (gmt.tm_min / 15) * 15 # discard remainder
+    time_str = time.strftime('%Y_%m_%d %H:'+str(adjusted_minutes).zfill(2), gmt)
+
+    subject = 'site [%s] is possibly down around [%s UTC]' % (url, time_str)
     msg = 'From: %s\nTo: %s\nSubject: %s\n%s\n' % (from_addr, to_addr, subject, body,)
     return msg
 
@@ -49,4 +60,4 @@ if __name__ == '__main__':
         send_pagerduty_email('http://www.foo.com', 'test msg')
     else:
         # normal usage
-        check_if_site_down()
+        check_if_sites_down()
