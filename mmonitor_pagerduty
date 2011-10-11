@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import logging
+import logging.handlers
 import smtplib
 import sys
 import time
@@ -7,6 +9,18 @@ import urllib2
 
 FROM_ADDR = 'mmonitor@corp.mixpanel.com'
 TO_ADDR = 'integration-test@mixpanel2.pagerduty.com'
+
+log_filepath = './mmonitor_pagerduty.log'
+max_filesize_bytes = 1024*1024*10
+logger = logging.getLogger('MMonitor.PagerDuty')
+logger.setLevel(logging.INFO)
+
+log_rotater = logging.handlers.RotatingFileHandler(log_filepath, maxBytes=max_filesize_bytes, backupCount=10)
+
+formatter = logging.Formatter('%(asctime)s - %(levelname)-7s - %(name)s - %(message)s')
+log_rotater.setFormatter(formatter)
+
+logger.addHandler(log_rotater)
 
 class HeadRequest(urllib2.Request):
     def get_method(self):
@@ -16,31 +30,42 @@ def check_if_sites_down():
     # simply pings www.mixpanel.com and api.mixpanel.com
     # if not 200, kicks off pagerduty incident via email
 
+    logger.info('starting to check sites')
     check_site('http://mixpanel.com')
     check_site('http://api.mixpanel.com')
+    logger.info('done checking sites.')
 
 def check_site(url):
-    print "testing site:", url # convert to logging
+    logger.info('checking site [%s]' % url)
     try:
-        resp = urllib2.urlopen(HeadRequest(url), data=None, timeout=30) # seconds
-        if resp.getcode() != 200:
+        resp = urllib2.urlopen(url, data=None, timeout=30) # seconds
+        resp_code = resp.getcode()
+        if resp_code != 200:
             send_pagerduty_email(url, resp.msg)
         else:
-            print "site ok:", url
+            logger.warn('site [%s] is possibly down, code [%d]. will send PagerDuty email.' % (url, resp_code))
+            logger.info('site [%s] is ok' % url)
     except Exception as ex:
-        print "exception!", str(ex)
-        pass # todo: logging. should also possibly send pagerduty if monitoring fails
+        # todo: make retries
+        logger.exception('exception occurred when testing site [%s]. will send PagerDuty email.' % url)
+        send_pagerduty_email(url, str(ex))
 
+# do not throw, since called from exception handling blocks
 def send_pagerduty_email(url, body):
     try:
-       msg = format_pagerduty_email(FROM_ADDR, TO_ADDR, url, body)
+        msg = format_pagerduty_email(FROM_ADDR, TO_ADDR, url, body)
+        smtp = smtplib.SMTP('localhost', 25, timeout=30) # also seconds
 
-       smtp = smtplib.SMTP('localhost', 25, timeout=30)
-       smtp.ehlo_or_helo_if_needed()
-       smtp.sendmail(FROM_ADDR, TO_ADDR, msg)
-       smtp.close() # todo: move to finally block
+        try:
+            smtp.ehlo_or_helo_if_needed()
+            smtp.sendmail(FROM_ADDR, TO_ADDR, msg)
+            logger.info('successfully sent PagerDuty email for site [%s]' % url)
+        except:
+            logger.exception('exception occurred when trying to send PagerDuty email for site [%s].' % url)
+        finally:
+            smtp.close()
     except:
-        pass
+        logger.exception('exception occurred when trying to acquire SMTP connection')
 
 def format_pagerduty_email(from_addr, to_addr, url, body):
     gmt = time.gmtime()
@@ -57,7 +82,7 @@ if __name__ == '__main__':
     nargs = len(sys.argv)
     if nargs > 1 and sys.argv[1] == 'test':
         # quick test in lieu of proper unit tests
-        send_pagerduty_email('http://www.foo.com', 'test msg')
+        check_site('http://www.sdfghgkfagdfgaf.com')
     else:
         # normal usage
         check_if_sites_down()
