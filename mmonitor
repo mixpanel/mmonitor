@@ -39,4 +39,4 @@ email.flush()
 try:
     subprocess.call(['./mmonitor_pagerduty'])
 except:
-    pass # todo: logging, other handling?
+    logging.exception('could not launch pagerduty test')
