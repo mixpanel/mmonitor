@@ -5,6 +5,7 @@ import logging.handlers
 import smtplib
 import sys
 import time
+import traceback
 import urllib2
 
 FROM_ADDR = 'mmonitor@corp.mixpanel.com'
@@ -21,10 +22,6 @@ formatter = logging.Formatter('%(asctime)s - %(levelname)-7s - %(name)s - %(mess
 log_rotater.setFormatter(formatter)
 
 logger.addHandler(log_rotater)
-
-class HeadRequest(urllib2.Request):
-    def get_method(self):
-        return 'GET'
 
 def check_if_sites_down():
     # simply pings www.mixpanel.com and api.mixpanel.com
@@ -48,7 +45,8 @@ def check_site(url):
     except Exception as ex:
         # todo: make retries
         logger.exception('exception occurred when testing site [%s]. will send PagerDuty email.' % url)
-        send_pagerduty_email(url, str(ex))
+        tb = traceback.format_exc()
+        send_pagerduty_email(url, '%s\n%s' % (str(ex), tb))
 
 # do not throw, since called from exception handling blocks
 def send_pagerduty_email(url, body):
