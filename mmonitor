@@ -3,6 +3,7 @@
 import simplejson as json
 from sys import argv
 import logging
+import subprocess
 
 import settings
 from mail import Email
@@ -33,3 +34,9 @@ tests(status, test)
 
 status = json.dump(status, open(status_file, 'w'), indent=4, sort_keys=True)
 email.flush()
+
+# pagerduty integration, keep simple for now
+try:
+    subprocess.call(['./mmonitor_pagerduty'])
+except:
+    pass # todo: logging, other handling?
