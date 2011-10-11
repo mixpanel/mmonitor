@@ -32,38 +32,42 @@ def check_if_sites_down():
     check_site('http://api.mixpanel.com')
     logger.info('done checking sites.')
 
+# i wanted to use HEAD instead of GET but one of our servers didn't support it
+# so, just use GET
 def check_site(url):
-    logger.info('checking site [%s]' % url)
+    resp = None
     try:
+        logger.info('checking site [%s]' % url)
         resp = urllib2.urlopen(url, data=None, timeout=30) # seconds
         resp_code = resp.getcode()
         if resp_code != 200:
-            send_pagerduty_email(url, resp.msg)
-        else:
             logger.warn('site [%s] is possibly down, code [%d]. will send PagerDuty email.' % (url, resp_code))
+            send_pagerduty_email(url, '%d %s' % (resp_code, resp.msg))
+        else:
             logger.info('site [%s] is ok' % url)
     except Exception as ex:
-        # todo: make retries
         logger.exception('exception occurred when testing site [%s]. will send PagerDuty email.' % url)
         tb = traceback.format_exc()
         send_pagerduty_email(url, '%s\n%s' % (str(ex), tb))
+    finally:
+        if resp:
+            resp.close()
 
 # do not throw, since called from exception handling blocks
 def send_pagerduty_email(url, body):
+    smtp = None
     try:
         msg = format_pagerduty_email(FROM_ADDR, TO_ADDR, url, body)
         smtp = smtplib.SMTP('localhost', 25, timeout=30) # also seconds
 
-        try:
-            smtp.ehlo_or_helo_if_needed()
-            smtp.sendmail(FROM_ADDR, TO_ADDR, msg)
-            logger.info('successfully sent PagerDuty email for site [%s]' % url)
-        except:
-            logger.exception('exception occurred when trying to send PagerDuty email for site [%s].' % url)
-        finally:
-            smtp.close()
+        smtp.ehlo_or_helo_if_needed()
+        smtp.sendmail(FROM_ADDR, TO_ADDR, msg)
+        logger.info('successfully sent PagerDuty email for site [%s]' % url)
     except:
-        logger.exception('exception occurred when trying to acquire SMTP connection')
+        logger.exception('exception occurred when trying to send PagerDuty email for site [%s].' % url)
+    finally:
+        if smtp:
+            smtp.close()
 
 def format_pagerduty_email(from_addr, to_addr, url, body):
     gmt = time.gmtime()
@@ -78,9 +82,17 @@ def format_pagerduty_email(from_addr, to_addr, url, body):
 
 if __name__ == '__main__':
     nargs = len(sys.argv)
-    if nargs > 1 and sys.argv[1] == 'test':
+    if nargs == 2:
         # quick test in lieu of proper unit tests
-        check_site('http://www.sdfghgkfagdfgaf.com')
-    else:
+        test_type = sys.argv[1]
+        if test_type == 'test_real':
+            check_site('http://www.yahoo.com')
+        elif test_type == 'test_fake':
+            check_site('http://www.sdfghgkfagdfgaf.com')
+        else:
+            raise Exception('unknown arg: ' + test_type)
+    elif nargs == 1:
         # normal usage
         check_if_sites_down()
+    else:
+        raise Exception('wrong number of args')
