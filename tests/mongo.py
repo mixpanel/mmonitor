@@ -9,14 +9,12 @@ class Mongo(Test):
 
     def test(self, ip, status):
         for port in status[self.name]:
+            oldstatus = status[self.name][port]
             try:
                 result = self.get_status(ip, port)
-            except Exception as e:
+                status[self.name][port] = self.parse_status(result)
+            except Exception:
                 status[self.name][port] = 'error'
-                continue
-
-            oldstatus = status[self.name][port]
-            status[self.name][port] = self.parse_status(result)
             if status[self.name][port] != oldstatus:
                 self.email.add('%s:%s mongo status change: %s -> %s' % (status['hostname'], port, oldstatus, status[self.name][port]))
 
