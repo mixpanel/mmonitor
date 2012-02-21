@@ -5,13 +5,20 @@ from test import Test
 class Arb(Test):
     def __init__(self, email):
         import time
+        import urllib
 
         super(Arb, self).__init__(email)
         self.name = 'arb'
         t = time.gmtime(time.time() - 3600 * 24)
         date = time.strftime('%Y-%m-%d', t)
-        self.query = ':8000/query?project_id=3&to_date=%s&from_date=%s&selector=false' % (date, date)
-        self.response = '{"%s":0}\n' % date
+        params = {
+                'project_id': 3,
+                'from_date': date,
+                'to_date': date,
+                'queries': '[{"selector":"false"}]',
+            }
+        self.query = ':8000/distributed-query?' + urllib.urlencode(params)
+        self.response = '{"status":"ok","results":{"%s":0}}\n' % date
 
     def test(self, ip, status):
         oldstatus = status[self.name]
