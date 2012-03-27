@@ -20,14 +20,14 @@ class Arb(Test):
         self.query = ':8000/distributed-query?' + urllib.urlencode(params)
         self.response = '{"status":"ok","results":{"%s":0}}\n' % date
 
-    def test(self, ip, status):
+    def test(self, host, status):
         oldstatus = status[self.name]
-        if self.is_up(ip):
+        if self.is_up(status['ip']):
             status[self.name] = 'up'
         else:
             status[self.name] = 'down'
         if status[self.name] != oldstatus:
-            self.email.add('%s arb status change: %s -> %s' % (status['hostname'], oldstatus, status[self.name]))
+            self.email.add('%s arb status change: %s -> %s' % (host, oldstatus, status[self.name]))
 
     def discover(self, ip, status):
         if self.is_up(ip):

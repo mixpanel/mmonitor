@@ -7,16 +7,16 @@ class Mongo(Test):
         super(Mongo, self).__init__(email)
         self.name = 'mongo'
 
-    def test(self, ip, status):
+    def test(self, host, status):
         for port in status[self.name]:
             oldstatus = status[self.name][port]
             try:
-                result = self.get_status(ip, port)
+                result = self.get_status(status['ip'], port)
                 status[self.name][port] = self.parse_status(result)
             except Exception:
                 status[self.name][port] = 'error'
             if status[self.name][port] != oldstatus:
-                self.email.add('%s:%s mongo status change: %s -> %s' % (status['hostname'], port, oldstatus, status[self.name][port]))
+                self.email.add('%s:%s mongo status change: %s -> %s' % (host, port, oldstatus, status[self.name][port]))
 
     def discover(self, ip, status):
         s = {}

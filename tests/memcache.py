@@ -5,9 +5,9 @@ class Memcache(Test):
         super(Memcache, self).__init__(email)
         self.name = 'memcache'
 
-    def test(self, ip, status):
+    def test(self, host, status):
         oldstatus = status[self.name]
-        if self.is_up(ip):
+        if self.is_up(status['ip']):
             status[self.name] = 'up'
         else:
             status[self.name] = 'down'
