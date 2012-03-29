@@ -7,5 +7,8 @@ tests = [mongo.Mongo, arb.Arb, memcache.Memcache]
 exclude = ['tim', 'suhail', 'raylu', 'avery', 'carl', 'anlu', 'neil', 'peter']
 
 smtp_host = 'localhost'
-from_addr = 'mmonitor@corp.mixpanel.com'
+smtp_port = 25
+smtp_user = ''
+smtp_password = ''
+from_addr = 'mmonitor@monitor01.mixpanel.com'
 to_addr = 'servers@example.com'
