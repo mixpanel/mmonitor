@@ -25,8 +25,11 @@ class Arb(Test):
         if self.is_up(status['ip']):
             status[self.name] = 'up'
         else:
-            status[self.name] = 'down'
-        if status[self.name] != oldstatus:
+            if oldstatus == 'up':
+                status[self.name] = 'down 1'
+            else:
+                status[self.name] = 'down 2'
+        if status[self.name] != oldstatus and (oldstatus == 'down 2' or status[self.name] == 'down 2'):
             self.email.add('%s arb status change: %s -> %s' % (host, oldstatus, status[self.name]))
 
     def discover(self, ip, status):
