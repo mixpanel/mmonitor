@@ -26,9 +26,11 @@ class Email(object):
 
         logging.info('sending mail:\n%s', '\n'.join(self.messages))
         smtp = SMTP(settings.smtp_host, settings.smtp_port)
-        smtp.starttls()
+        if settings.smtp_tls:
+            smtp.starttls()
         smtp.ehlo_or_helo_if_needed()
-        smtp.login(settings.smtp_user, settings.smtp_password)
+        if settings.smtp_user:
+            smtp.login(settings.smtp_user, settings.smtp_password)
         smtp.sendmail(settings.from_addr, settings.to_addr, msg)
         smtp.close()
         self.messages = []
