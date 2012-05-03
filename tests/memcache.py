@@ -12,7 +12,7 @@ class Memcache(Test):
         else:
             status[self.name] = 'down'
         if status[self.name] != oldstatus:
-            self.email.add('%s memcache status change: %s -> %s' % (status['hostname'], oldstatus, status[self.name]))
+            self.email.add('%s memcache status change: %s -> %s' % (host, oldstatus, status[self.name]))
 
     def discover(self, ip, status):
         if self.is_up(ip):
