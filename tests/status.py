@@ -23,7 +23,7 @@ class Status(Test):
 
     def is_up(self, ip):
         try:
-            response = urllib2.urlopen('http://astatus.mixpanel.com', timeout=5)
+            response = urllib2.urlopen('http://status.mixpanel.com', timeout=5)
             last_mod = response.headers['last-modified']
             last_mod_date = datetime.strptime(last_mod, '%a, %d %b %Y %H:%M:%S %Z')
             delta = datetime.now() - last_mod_date
