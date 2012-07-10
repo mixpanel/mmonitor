@@ -1,10 +1,10 @@
 from discovery import softlayer
-from tests import mongo, arb, memcache
+from tests import mongo, arb, memcache, status
 
 discovery = [softlayer.SoftLayer]
-tests = [mongo.Mongo, arb.Arb, memcache.Memcache]
+tests = [mongo.Mongo, arb.Arb, memcache.Memcache, status.Status]
 
-exclude = ['tim', 'suhail', 'raylu', 'avery', 'carl', 'anlu', 'neil', 'peter']
+exclude = ['tim', 'suhail', 'raylu', 'avery', 'carl', 'anlu', 'neil', 'joe']
 
 smtp_host = 'localhost'
 smtp_port = 25
