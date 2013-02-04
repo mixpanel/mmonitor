@@ -23,7 +23,7 @@ class Mongo(Test):
         for port in ['27017', '27018', '27019']: # db, arbiter, config
             try:
                 s[port] = self.parse_status(self.get_status(ip, port))
-            except pymongo.errors.AutoReconnect:
+            except:
                 pass
         if s:
             status[self.name] = s
